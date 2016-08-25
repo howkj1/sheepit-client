@@ -230,7 +230,7 @@ public class Job {
 		Timer timerOfMaxRenderTime = null;
 		String core_script = "";
 		if (getUseGPU() && config.getGPUDevice() != null && config.getComputeMethod() != ComputeType.CPU) {
-			core_script = "sheepit_set_compute_device(\"" + config.getGPUDevice().getType() + "\", \"GPU\", \"" + config.getGPUDevice().getCudaName() + "\")\n";
+			core_script = "sheepit_set_compute_device(\"" + config.getGPUDevice().getType() + "\", \"GPU\", \"" + config.getGPUDevice().getId() + "\")\n";
 		}
 		else {
 			core_script = "sheepit_set_compute_device(\"NONE\", \"CPU\", \"CPU\")\n";
