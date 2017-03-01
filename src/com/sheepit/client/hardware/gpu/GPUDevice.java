@@ -75,5 +75,4 @@ public class GPUDevice {
 		// if the vram is lower than 1G reduce the size of tile to avoid black output
 		return (getMemory() > 1073741824L) ? 256 : 128;
 	}
-	
 }
