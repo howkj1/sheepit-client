@@ -845,10 +845,16 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 			return ret;
 		}
 		catch (Exception e) {
+<<<<<<< HEAD
 			StringWriter sw = new StringWriter();
 			PrintWriter pw = new PrintWriter(sw);
 			e.printStackTrace(pw);
 			this.log.debug("Server::getLastRender Exception " + e + " stacktrace: " + sw.toString());
+=======
+			System.err.println("Server::getLastRender exception " + e);
+			e.printStackTrace();
+			
+>>>>>>> 461346253fb09630a76c0144a441943a078b0744
 		}
 		return null;
 	}
