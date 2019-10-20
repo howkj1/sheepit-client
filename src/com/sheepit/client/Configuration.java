@@ -34,35 +34,47 @@ import java.util.List;
 import com.sheepit.client.hardware.cpu.CPU;
 import com.sheepit.client.hardware.gpu.GPUDevice;
 import com.sheepit.client.os.OS;
+import lombok.Data;
 
+@Data
 public class Configuration {
 	public enum ComputeType {
 		CPU_GPU, CPU, GPU
 	} // accept job for ...
 	
-	public File workingDirectory;
-	public File storageDirectory; // for permanent storage (binary archive)
-	public boolean userSpecifiedACacheDir;
-	public String static_exeDirName;
+	private String configFilePath;
+	private File workingDirectory;
+	private File storageDirectory; // for permanent storage (binary archive)
+	private boolean userHasSpecifiedACacheDir;
+	private String static_exeDirName;
 	private String login;
 	private String password;
 	private String proxy;
 	private int maxUploadingJob;
 	private int nbCores;
+<<<<<<< HEAD
 	private int maxMemory; // max memory allowed for render
+=======
+	private long maxMemory; // max memory allowed for render
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	private int maxRenderTime; // max render time per frame allowed
 	private int priority;
 	private ComputeType computeMethod;
 	private GPUDevice GPUDevice;
+	private boolean detectGPUs;
 	private boolean printLog;
-	public List<Pair<Calendar, Calendar>> requestTime;
+	private List<Pair<Calendar, Calendar>> requestTime;
 	private String extras;
 	private boolean autoSignIn;
 	private String UIType;
+<<<<<<< HEAD
 	private int tileSize;
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	private String hostname;
 	
 	public Configuration(File cache_dir_, String login_, String password_) {
+		this.configFilePath = null;
 		this.login = login_;
 		this.password = password_;
 		this.proxy = null;
@@ -75,7 +87,8 @@ public class Configuration {
 		this.priority = 19; // default lowest
 		this.computeMethod = null;
 		this.GPUDevice = null;
-		this.userSpecifiedACacheDir = false;
+		this.userHasSpecifiedACacheDir = false;
+		this.detectGPUs = true;
 		this.workingDirectory = null;
 		this.storageDirectory = null;
 		this.setCacheDir(cache_dir_);
@@ -84,13 +97,17 @@ public class Configuration {
 		this.extras = "";
 		this.autoSignIn = false;
 		this.UIType = null;
+<<<<<<< HEAD
 		this.tileSize = -1; // ie not set
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	}
 	
 	
 	public String toString() {
 		return String.format("Configuration (workingDirectory '%s')", this.workingDirectory.getAbsolutePath());
 	}
+<<<<<<< HEAD
 	
 	public String login() {
 		return this.login;
@@ -152,6 +169,9 @@ public class Configuration {
 		return this.maxRenderTime;
 	}
 	
+=======
+
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	public void setUsePriority(int priority) {
 		if (priority > 19)
 			priority = 19;
@@ -160,6 +180,7 @@ public class Configuration {
 		
 		this.priority = priority;
 		
+<<<<<<< HEAD
 	}
 	
 	public int getPriority() {
@@ -172,28 +193,18 @@ public class Configuration {
 	
 	public boolean getPrintLog() {
 		return this.printLog;
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	}
 	
 	public int computeMethodToInt() {
 		return this.computeMethod.ordinal();
 	}
 	
-	public ComputeType getComputeMethod() {
-		return this.computeMethod;
-	}
-	
-	public void setUseGPU(GPUDevice device) {
-		this.GPUDevice = device;
-	}
-	
-	public void setComputeMethod(ComputeType meth) {
-		this.computeMethod = meth;
-	}
-	
 	public void setCacheDir(File cache_dir_) {
 		removeWorkingDirectory();
 		if (cache_dir_ == null) {
-			this.userSpecifiedACacheDir = false;
+			this.userHasSpecifiedACacheDir = false;
 			try {
 				this.workingDirectory = File.createTempFile("farm_", "");
 				this.workingDirectory.createNewFile(); // hoho...
@@ -212,9 +223,17 @@ public class Configuration {
 			}
 		}
 		else {
+<<<<<<< HEAD
 			this.userSpecifiedACacheDir = true;
 			this.workingDirectory = cache_dir_;
 			this.storageDirectory = cache_dir_;
+=======
+			this.userHasSpecifiedACacheDir = true;
+			this.workingDirectory = new File(cache_dir_.getAbsolutePath() + File.separator + "sheepit");
+			this.storageDirectory = new File(cache_dir_.getAbsolutePath() + File.separator + "sheepit_binary_cache");
+			this.workingDirectory.mkdirs();
+			this.storageDirectory.mkdirs();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		
 	}
@@ -237,16 +256,32 @@ public class Configuration {
 		}
 	}
 	
+<<<<<<< HEAD
 	public boolean getUserSpecifiedACacheDir() {
 		return this.userSpecifiedACacheDir;
 	}
 	
 	public void setExtras(String str) {
 		this.extras = str;
+=======
+	public File getCacheDirForSettings() {
+		if (this.userHasSpecifiedACacheDir == false) {
+			return null;
+		}
+		else {
+			// when the user have a cache directory a "sheepit" and "sheepit_binary_cache" is be automaticaly added
+			return this.workingDirectory.getParentFile();
+		}
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	}
 	
-	public String getExtras() {
-		return this.extras;
+	public String getDefaultHostname() {
+		try {
+			return InetAddress.getLocalHost().getHostName();
+		}
+		catch (UnknownHostException e) {
+			return "";
+		}
 	}
 	
 	public void setAutoSignIn(boolean v) {
@@ -334,7 +369,7 @@ public class Configuration {
 	}
 	
 	public void removeWorkingDirectory() {
-		if (this.userSpecifiedACacheDir == true) {
+		if (this.userHasSpecifiedACacheDir) {
 			this.cleanWorkingDirectory();
 		}
 		else {
@@ -385,7 +420,7 @@ public class Configuration {
 		InputStream versionStream = Client.class.getResourceAsStream(versionPath);
 		if (versionStream == null) {
 			System.err.println("Configuration::getJarVersion Failed to get version file");
-			return "";
+			return "5.0.0";
 		}
 		
 		try {
@@ -397,7 +432,7 @@ public class Configuration {
 		}
 		catch (IOException ex) {
 			System.err.println("Configuration::getJarVersion error while reading manifest file (" + versionPath + "): " + ex.getMessage());
-			return "";
+			return "5.0.0";
 		}
 	}
 	

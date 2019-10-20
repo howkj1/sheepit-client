@@ -57,6 +57,10 @@ import com.sheepit.client.hardware.gpu.GPUDevice;
 import com.sheepit.client.network.Proxy;
 import com.sheepit.client.os.OS;
 import com.sheepit.client.standalone.GuiSwing;
+<<<<<<< HEAD
+=======
+import com.sheepit.client.standalone.swing.components.CollapsibleJPanel;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 
 public class Settings implements Activity {
 	private static final String DUMMY_CACHE_DIR = "Auto detected";
@@ -83,10 +87,13 @@ public class Settings implements Activity {
 	
 	private boolean haveAutoStarted;
 	
+<<<<<<< HEAD
 	private JTextField tileSizeValue;
 	private JLabel tileSizeLabel;
 	private JCheckBox customTileSize;
 	
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	public Settings(GuiSwing parent_) {
 		parent = parent_;
 		cacheDir = null;
@@ -97,9 +104,15 @@ public class Settings implements Activity {
 	@Override
 	public void show() {
 		Configuration config = parent.getConfiguration();
+<<<<<<< HEAD
 		new SettingsLoader().merge(config);
 		
 		List<GPUDevice> gpus = GPU.listDevices();
+=======
+		new SettingsLoader(config.getConfigFilePath()).merge(config);
+		
+		List<GPUDevice> gpus = GPU.listDevices(config);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		
 		GridBagConstraints constraints = new GridBagConstraints();
 		int currentRow = 0;
@@ -115,17 +128,29 @@ public class Settings implements Activity {
 		++currentRow;
 		
 		// authentication
+<<<<<<< HEAD
 		JPanel authentication_panel = new JPanel(new GridLayout(2, 2));
+=======
+		CollapsibleJPanel authentication_panel = new CollapsibleJPanel(new GridLayout(2, 2));
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		authentication_panel.setBorder(BorderFactory.createTitledBorder("Authentication"));
 		
 		JLabel loginLabel = new JLabel("Username:");
 		login = new JTextField();
+<<<<<<< HEAD
 		login.setText(parent.getConfiguration().login());
+=======
+		login.setText(parent.getConfiguration().getLogin());
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		login.setColumns(20);
 		login.addKeyListener(new CheckCanStart());
 		JLabel passwordLabel = new JLabel("Password:");
 		password = new JPasswordField();
+<<<<<<< HEAD
 		password.setText(parent.getConfiguration().password());
+=======
+		password.setText(parent.getConfiguration().getPassword());
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		password.setColumns(10);
 		password.addKeyListener(new CheckCanStart());
 		
@@ -141,13 +166,22 @@ public class Settings implements Activity {
 		parent.getContentPane().add(authentication_panel, constraints);
 		
 		// directory
+<<<<<<< HEAD
 		JPanel directory_panel = new JPanel(new GridLayout(1, 3));
+=======
+		CollapsibleJPanel directory_panel = new CollapsibleJPanel(new GridLayout(1, 3));
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		directory_panel.setBorder(BorderFactory.createTitledBorder("Cache"));
 		JLabel cacheLabel = new JLabel("Working directory:");
 		directory_panel.add(cacheLabel);
 		String destination = DUMMY_CACHE_DIR;
+<<<<<<< HEAD
 		if (config.getUserSpecifiedACacheDir()) {
 			destination = config.getStorageDir().getName();
+=======
+		if (config.isUserHasSpecifiedACacheDir()) {
+			destination = config.getCacheDirForSettings().getName();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		
 		JPanel cacheDirWrapper = new JPanel();
@@ -175,7 +209,11 @@ public class Settings implements Activity {
 		// compute devices
 		GridBagLayout gridbag = new GridBagLayout();
 		GridBagConstraints compute_devices_constraints = new GridBagConstraints();
+<<<<<<< HEAD
 		JPanel compute_devices_panel = new JPanel(gridbag);
+=======
+		CollapsibleJPanel compute_devices_panel = new CollapsibleJPanel(gridbag);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		
 		compute_devices_panel.setBorder(BorderFactory.createTitledBorder("Compute devices"));
 		
@@ -208,10 +246,17 @@ public class Settings implements Activity {
 		
 		for (GPUDevice gpu : gpus) {
 			JCheckBoxGPU gpuCheckBox = new JCheckBoxGPU(gpu);
+<<<<<<< HEAD
 			gpuCheckBox.setToolTipText(gpu.getCudaName());
 			if (gpuChecked) {
 				GPUDevice config_gpu = config.getGPUDevice();
 				if (config_gpu != null && config_gpu.getCudaName().equals(gpu.getCudaName())) {
+=======
+			gpuCheckBox.setToolTipText(gpu.getId());
+			if (gpuChecked) {
+				GPUDevice config_gpu = config.getGPUDevice();
+				if (config_gpu != null && config_gpu.getId().equals(gpu.getId())) {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 					gpuCheckBox.setSelected(gpuChecked);
 				}
 			}
@@ -256,7 +301,11 @@ public class Settings implements Activity {
 		
 		// max ram allowed to render
 		OS os = OS.getOS();
+<<<<<<< HEAD
 		int all_ram = os.getMemory();
+=======
+		int all_ram = (int) os.getMemory();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		ram = new JSlider(0, all_ram);
 		int step = 1000000;
 		double display = (double)all_ram / (double)step;
@@ -272,7 +321,11 @@ public class Settings implements Activity {
 		ram.setLabelTable(labelTable);
 		ram.setPaintTicks(true);
 		ram.setPaintLabels(true);
+<<<<<<< HEAD
 		ram.setValue(config.getMaxMemory() != -1 ? config.getMaxMemory() : os.getMemory());
+=======
+		ram.setValue((int)(config.getMaxMemory() != -1 ? config.getMaxMemory() : os.getMemory()));
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		JLabel ramLabel = new JLabel("Memory:");
 		
 		compute_devices_constraints.weightx = 1.0 / gpus.size();
@@ -320,7 +373,11 @@ public class Settings implements Activity {
 		parent.getContentPane().add(compute_devices_panel, constraints);
 		
 		// other
+<<<<<<< HEAD
 		JPanel advanced_panel = new JPanel(new GridLayout(5, 2));
+=======
+		CollapsibleJPanel advanced_panel = new CollapsibleJPanel(new GridLayout(3, 2));
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		advanced_panel.setBorder(BorderFactory.createTitledBorder("Advanced options"));
 		
 		JLabel proxyLabel = new JLabel("Proxy:");
@@ -350,6 +407,7 @@ public class Settings implements Activity {
 		advanced_panel.add(renderTimeLabel);
 		advanced_panel.add(renderTime);
 		
+<<<<<<< HEAD
 		JLabel customTileSizeLabel = new JLabel("Custom render tile size:");
 		customTileSize = new JCheckBox("", config.getTileSize() != -1);
 		advanced_panel.add(customTileSizeLabel);
@@ -374,11 +432,17 @@ public class Settings implements Activity {
 		advanced_panel.add(tileSizeLabel);
 		advanced_panel.add(tileSizeValue);
 		
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		currentRow++;
 		constraints.gridx = 0;
 		constraints.gridy = currentRow;
 		constraints.gridwidth = 2;
 		parent.getContentPane().add(advanced_panel, constraints);
+<<<<<<< HEAD
+=======
+		advanced_panel.setCollapsed(true);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		
 		// general settings
 		JPanel general_panel = new JPanel(new GridLayout(1, 2));
@@ -386,7 +450,11 @@ public class Settings implements Activity {
 		saveFile = new JCheckBox("Save settings", true);
 		general_panel.add(saveFile);
 		
+<<<<<<< HEAD
 		autoSignIn = new JCheckBox("Auto sign in", config.getAutoSignIn());
+=======
+		autoSignIn = new JCheckBox("Auto sign in", config.isAutoSignIn());
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		autoSignIn.addActionListener(new AutoSignInChangeAction());
 		general_panel.add(autoSignIn);
 		
@@ -411,13 +479,18 @@ public class Settings implements Activity {
 		constraints.gridy = currentRow;
 		parent.getContentPane().add(saveButton, constraints);
 		
+<<<<<<< HEAD
 		if (haveAutoStarted == false && config.getAutoSignIn() && checkDisplaySaveButton()) {
+=======
+		if (haveAutoStarted == false && config.isAutoSignIn() && checkDisplaySaveButton()) {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			// auto start
 			haveAutoStarted = true;
 			new SaveAction().actionPerformed(null);
 		}
 	}
 	
+<<<<<<< HEAD
 	public void hideCustomTileSize(boolean hidden, boolean displayWarning) {
 		tileSizeValue.setVisible(hidden);
 		tileSizeLabel.setVisible(hidden);
@@ -426,6 +499,8 @@ public class Settings implements Activity {
 		}
 	}
 	
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	public boolean checkDisplaySaveButton() {
 		boolean selected = useCPU.isSelected();
 		for (JCheckBoxGPU box : useGPUs) {
@@ -436,6 +511,7 @@ public class Settings implements Activity {
 		if (login.getText().isEmpty() || password.getPassword().length == 0 || Proxy.isValidURL(proxy.getText()) == false) {
 			selected = false;
 		}
+<<<<<<< HEAD
 		
 		if (customTileSize.isSelected()) {
 			try {
@@ -445,6 +521,9 @@ public class Settings implements Activity {
 				selected = false;
 			}
 		}
+=======
+
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		saveButton.setEnabled(selected);
 		return selected;
 	}
@@ -494,6 +573,7 @@ public class Settings implements Activity {
 		}
 	}
 	
+<<<<<<< HEAD
 	class TileSizeChange implements ActionListener {
 		
 		@Override
@@ -503,6 +583,8 @@ public class Settings implements Activity {
 		}
 	}
 	
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	class SaveAction implements ActionListener {
 		
 		@Override
@@ -546,7 +628,11 @@ public class Settings implements Activity {
 			config.setComputeMethod(method);
 			
 			if (selected_gpu != null) {
+<<<<<<< HEAD
 				config.setUseGPU(selected_gpu);
+=======
+				config.setGPUDevice(selected_gpu);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			}
 			
 			int cpu_cores = -1;
@@ -555,10 +641,17 @@ public class Settings implements Activity {
 			}
 			
 			if (cpu_cores > 0) {
+<<<<<<< HEAD
 				config.setUseNbCores(cpu_cores);
 			}
 			
 			int max_ram = -1;
+=======
+				config.setNbCores(cpu_cores);
+			}
+			
+			long max_ram = -1;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			if (ram != null) {
 				max_ram = ram.getValue();
 			}
@@ -588,6 +681,7 @@ public class Settings implements Activity {
 				}
 			}
 			
+<<<<<<< HEAD
 			String tile = null;
 			if (customTileSize.isSelected() && tileSizeValue != null) {
 				try {
@@ -609,6 +703,13 @@ public class Settings implements Activity {
 			String cachePath = null;
 			if (config.getUserSpecifiedACacheDir() && config.getStorageDir() != null) {
 				cachePath = config.getStorageDir().getAbsolutePath();
+=======
+			parent.setCredentials(login.getText(), new String(password.getPassword()));
+			
+			String cachePath = null;
+			if (config.isUserHasSpecifiedACacheDir() && config.getCacheDirForSettings() != null) {
+				cachePath = config.getCacheDirForSettings().getAbsolutePath();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			}
 			
 			String hostnameText = hostname.getText();
@@ -617,6 +718,7 @@ public class Settings implements Activity {
 			}
 			
 			if (saveFile.isSelected()) {
+<<<<<<< HEAD
 				new SettingsLoader(login.getText(), new String(password.getPassword()), proxyText, hostnameText, method, selected_gpu, cpu_cores, max_ram, max_rendertime, cachePath, autoSignIn.isSelected(), GuiSwing.type, tile, priority.getValue()).saveFile();
 			}
 			else {
@@ -624,6 +726,14 @@ public class Settings implements Activity {
 					new File(new SettingsLoader().getFilePath()).delete();
 				}
 				catch (SecurityException e3) {
+=======
+				parent.setSettingsLoader(new SettingsLoader(config.getConfigFilePath(), login.getText(), new String(password.getPassword()), proxyText, hostnameText, method, selected_gpu, cpu_cores, max_ram, max_rendertime, cachePath, autoSignIn.isSelected(), GuiSwing.type, priority.getValue()));
+				
+				// wait for successful authentication (to store the public key)
+				// or do we already have one?
+				if (parent.getClient().getServer().getServerConfig() != null && parent.getClient().getServer().getServerConfig().getPublickey() != null) {
+					parent.getSettingsLoader().saveFile();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 				}
 			}
 		}

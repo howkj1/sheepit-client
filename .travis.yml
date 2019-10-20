@@ -1,9 +1,17 @@
 language: java
+<<<<<<< HEAD
 script: ant
 
 os:
   - linux
   - osx
+=======
+dist: trusty
+
+os:
+  - linux
+
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 
 # safelist
 branches:

@@ -45,6 +45,7 @@ import javax.swing.border.EmptyBorder;
 import com.sheepit.client.Client;
 import com.sheepit.client.Configuration;
 import com.sheepit.client.Gui;
+<<<<<<< HEAD
 import com.sheepit.client.Stats;
 import com.sheepit.client.standalone.swing.activity.Settings;
 import com.sheepit.client.standalone.swing.activity.Working;
@@ -52,6 +53,18 @@ import com.sheepit.client.standalone.swing.activity.Working;
 public class GuiSwing extends JFrame implements Gui {
 	public static final String type = "swing";
 	
+=======
+import com.sheepit.client.SettingsLoader;
+import com.sheepit.client.Stats;
+import com.sheepit.client.standalone.swing.activity.Settings;
+import com.sheepit.client.standalone.swing.activity.Working;
+import lombok.Getter;
+import lombok.Setter;
+
+public class GuiSwing extends JFrame implements Gui {
+	public static final String type = "swing";
+
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	public enum ActivityType {
 		WORKING, SETTINGS
 	}
@@ -62,17 +75,35 @@ public class GuiSwing extends JFrame implements Gui {
 	private Settings activitySettings;
 	private TrayIcon trayIcon;
 	private boolean useSysTray;
+<<<<<<< HEAD
+=======
+	private String title;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	
 	private int framesRendered;
 	
 	private boolean waitingForAuthentication;
 	private Client client;
+<<<<<<< HEAD
 	
 	private ThreadClient threadClient;
 	
 	public GuiSwing(boolean useSysTray_) {
 		framesRendered = 0;
 		useSysTray = useSysTray_;
+=======
+
+	@Getter
+	@Setter
+	private SettingsLoader settingsLoader;
+	
+	private ThreadClient threadClient;
+	
+	public GuiSwing(boolean useSysTray_, String title_) {
+		framesRendered = 0;
+		useSysTray = useSysTray_;
+		title = title_;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		waitingForAuthentication = true;
 		
 		new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -118,8 +149,13 @@ public class GuiSwing extends JFrame implements Gui {
 			setIconImage(img.getImage());
 		}
 		
+<<<<<<< HEAD
 		setTitle("SheepIt Render Farm");
 		setSize(520, 680);
+=======
+		setTitle(title);
+		setSize(520, 760);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
@@ -220,6 +256,19 @@ public class GuiSwing extends JFrame implements Gui {
 	public Configuration getConfiguration() {
 		return client.getConfiguration();
 	}
+<<<<<<< HEAD
+=======
+
+	@Override
+	public void successfulAuthenticationEvent(String publickey) {
+		if (settingsLoader != null) {
+			if (publickey != null) {
+				settingsLoader.setPassword(publickey);
+			}
+			settingsLoader.saveFile();
+		}
+	}
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	
 	public void setCredentials(String contentLogin, String contentPassword) {
 		client.getConfiguration().setLogin(contentLogin);

@@ -88,7 +88,7 @@ public class Linux extends OS {
 	}
 	
 	@Override
-	public int getMemory() {
+	public long getMemory() {
 		try {
 			String filePath = "/proc/meminfo";
 			Scanner scanner = new Scanner(new File(filePath));
@@ -108,6 +108,35 @@ public class Linux extends OS {
 		}
 		catch (java.lang.NoClassDefFoundError e) {
 			System.err.println("Machine::type error " + e + " mostly because Scanner class was introducted by Java 5 and you are running a lower version");
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return 0;
+	}
+	
+	@Override
+	public long getFreeMemory() {
+		try {
+			String filePath = "/proc/meminfo";
+			Scanner scanner = new Scanner(new File(filePath));
+			
+			while (scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				
+				if (line.startsWith("MemAvailable")) {
+					String buf[] = line.split(":");
+					if (buf.length > 0) {
+						Integer buf2 = new Integer(buf[1].trim().split(" ")[0]);
+						return (((buf2 / 262144) + 1) * 262144); // 256*1024 = 262144
+					}
+				}
+			}
+			scanner.close();
+		}
+		catch (java.lang.NoClassDefFoundError e) {
+			System.err.println("OS::Linux::getFreeMemory error " + e + " mostly because Scanner class was introducted by Java 5 and you are running a lower version");
 		}
 		catch (Exception e) {
 			e.printStackTrace();

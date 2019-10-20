@@ -39,7 +39,7 @@ public class Log {
 		this.printStdOut = print_;
 		this.lastCheckPoint = 0;
 		this.checkpoints.put(this.lastCheckPoint, new ArrayList<String>());
-		this.dateFormat = new SimpleDateFormat("dd-MM kk:mm:ss");
+		this.dateFormat = new SimpleDateFormat("dd-MM HH:mm:ss");
 	}
 	
 	public void debug(String msg_) {
@@ -89,7 +89,7 @@ public class Log {
 		if (instance == null) {
 			boolean print = false;
 			if (config != null) {
-				print = config.getPrintLog();
+				print = config.isPrintLog();
 			}
 			instance = new Log(print);
 		}

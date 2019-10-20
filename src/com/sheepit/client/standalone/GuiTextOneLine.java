@@ -134,16 +134,28 @@ public class GuiTextOneLine implements Gui {
 	@Override
 	public void setRemainingTime(String time_) {
 		status = "(remaining " + time_ + ")";
+<<<<<<< HEAD
 		updateLine();
 	}
 	
 	@Override
 	public void setRenderingTime(String time_) {
 		status = "Rendering " + time_;
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		updateLine();
 	}
 	
 	@Override
+<<<<<<< HEAD
+=======
+	public void setRenderingTime(String time_) {
+		status = "Rendering " + time_;
+		updateLine();
+	}
+	
+	@Override
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	public void setClient(Client cli) {
 		client = cli;
 	}
@@ -158,6 +170,14 @@ public class GuiTextOneLine implements Gui {
 		return client;
 	}
 	
+<<<<<<< HEAD
+=======
+	@Override
+	public void successfulAuthenticationEvent(String publickey) {
+	
+	}
+	
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	private void updateLine() {
 		int charToRemove = line.length();
 		

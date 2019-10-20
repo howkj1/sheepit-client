@@ -20,15 +20,27 @@
 package com.sheepit.client.hardware.gpu;
 
 public class GPUDevice {
+	private String type;
 	private String model;
 	private long memory; // in B
 	
-	private String cudaName;
+	private String id;
 	
-	public GPUDevice(String model, long ram, String cuda) {
+	private String oldId; // for backward compatibility
+	
+	public GPUDevice(String type, String model, long ram, String id) {
+		this.type = type;
 		this.model = model;
 		this.memory = ram;
-		this.cudaName = cuda;
+		this.id = id;
+	}
+	
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 	
 	public String getModel() {
@@ -47,18 +59,27 @@ public class GPUDevice {
 		this.memory = memory;
 	}
 	
-	public String getCudaName() {
-		return cudaName;
+	public String getId() {
+		return id;
 	}
 	
-	public void setCudaName(String cudaName) {
-		this.cudaName = cudaName;
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	public String getOldId() {
+		return oldId;
+	}
+	
+	public void setOldId(String id) {
+		this.oldId = id;
 	}
 	
 	@Override
 	public String toString() {
-		return "GPUDevice [model=" + model + ", memory=" + memory + ", cudaName=" + cudaName + "]";
+		return "GPUDevice [type=" + type + ", model='" + model + "', memory=" + memory + ", id=" + id + "]";
 	}
+<<<<<<< HEAD
 	
 	public int getRecommandedTileSize() {
 		// GPU
@@ -66,4 +87,6 @@ public class GPUDevice {
 		return (getMemory() > 1073741824L) ? 256 : 128;
 	}
 	
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 }

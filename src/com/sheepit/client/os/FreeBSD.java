@@ -111,7 +111,11 @@ public class FreeBSD extends OS {
 	}
 	
 	@Override
+<<<<<<< HEAD
 	public int getMemory() {
+=======
+	public long getMemory() {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		try {
 			Runtime r = Runtime.getRuntime();
 			Process p = r.exec("sysctl -n hw.usermem");
@@ -124,7 +128,11 @@ public class FreeBSD extends OS {
 				return 0;
 			}
 			Long mem_byte = Long.parseLong(line.trim());
+<<<<<<< HEAD
 			return (int) (mem_byte / Long.valueOf(1024));
+=======
+			return mem_byte / Long.valueOf(1024);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		catch (IOException e) {
 			Log.getInstance(null).debug("OS::FreeBSD::getMemory exception " + e);
@@ -134,6 +142,14 @@ public class FreeBSD extends OS {
 	}
 	
 	@Override
+<<<<<<< HEAD
+=======
+	public long getFreeMemory() {
+		return -1;
+	}
+	
+	@Override
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	public String getCUDALib() {
 		return "cuda";
 	}

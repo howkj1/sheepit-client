@@ -36,12 +36,23 @@ import com.sheepit.client.Configuration;
 import com.sheepit.client.Configuration.ComputeType;
 import com.sheepit.client.hardware.gpu.GPU;
 import com.sheepit.client.hardware.gpu.GPUDevice;
+<<<<<<< HEAD
+=======
+import lombok.Setter;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 
 public class SettingsLoader {
 	private String path;
 	
 	private String login;
+<<<<<<< HEAD
 	private String password;
+=======
+	
+	@Setter
+	private String password;
+	
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	private String proxy;
 	private String hostname;
 	private String computeMethod;
@@ -52,6 +63,7 @@ public class SettingsLoader {
 	private String cacheDir;
 	private String autoSignIn;
 	private String ui;
+<<<<<<< HEAD
 	private String tileSize;
 	private int    priority;
 	
@@ -65,6 +77,26 @@ public class SettingsLoader {
 	
 	public SettingsLoader(String login_, String password_, String proxy_, String hostname_, ComputeType computeMethod_, GPUDevice gpu_, int cores_, int maxRam_, int maxRenderTime_, String cacheDir_, boolean autoSignIn_, String ui_, String tileSize_, int priority_) {
 		path = getDefaultFilePath();
+=======
+	private int    priority;
+	
+	public SettingsLoader(String path_) {
+		if (path_ == null) {
+			path = getDefaultFilePath();
+		}
+		else {
+			path = path_;
+		}
+	}
+	
+	public SettingsLoader(String path_, String login_, String password_, String proxy_, String hostname_, ComputeType computeMethod_, GPUDevice gpu_, int cores_, long maxRam_, int maxRenderTime_, String cacheDir_, boolean autoSignIn_, String ui_, int priority_) {
+		if (path_ == null) {
+			path = getDefaultFilePath();
+		}
+		else {
+			path = path_;
+		}
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		login = login_;
 		password = password_;
 		proxy = proxy_;
@@ -72,13 +104,20 @@ public class SettingsLoader {
 		cacheDir = cacheDir_;
 		autoSignIn = String.valueOf(autoSignIn_);
 		ui = ui_;
+<<<<<<< HEAD
 		tileSize = tileSize_;
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		priority = priority_;
 		if (cores_ > 0) {
 			cores = String.valueOf(cores_);
 		}
 		if (maxRam_ > 0) {
+<<<<<<< HEAD
 			ram = String.valueOf(maxRam_);
+=======
+			ram = String.valueOf(maxRam_) + "k";
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		if (maxRenderTime_ > 0) {
 			renderTime = String.valueOf(maxRenderTime_);
@@ -92,7 +131,11 @@ public class SettingsLoader {
 		}
 		
 		if (gpu_ != null) {
+<<<<<<< HEAD
 			gpu = gpu_.getCudaName();
+=======
+			gpu = gpu_.getId();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 	}
 	
@@ -124,7 +167,11 @@ public class SettingsLoader {
 			}
 			
 			if (cores != null) {
+<<<<<<< HEAD
 				prop.setProperty("cpu-cores", cores);
+=======
+				prop.setProperty("cores", cores);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			}
 			
 			if (ram != null) {
@@ -159,10 +206,13 @@ public class SettingsLoader {
 				prop.setProperty("ui", ui);
 			}
 			
+<<<<<<< HEAD
 			if (tileSize != null) {
 				prop.setProperty("tile-size", tileSize);
 			}
 			
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			prop.store(output, null);
 		}
 		catch (IOException io) {
@@ -205,7 +255,10 @@ public class SettingsLoader {
 		this.cacheDir = null;
 		this.autoSignIn = null;
 		this.ui = null;
+<<<<<<< HEAD
 		this.tileSize = null;
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		this.priority = 19; // must be the same default as Configuration
 		this.ram = null;
 		this.renderTime = null;
@@ -232,10 +285,21 @@ public class SettingsLoader {
 				this.gpu = prop.getProperty("compute-gpu");
 			}
 			
+<<<<<<< HEAD
 			if (prop.containsKey("cpu-cores")) {
 				this.cores = prop.getProperty("cpu-cores");
 			}
 			
+=======
+			if (prop.containsKey("cpu-cores")) { // backward compatibility
+				this.cores = prop.getProperty("cpu-cores");
+			}
+			
+			if (prop.containsKey("cores")) {
+				this.cores = prop.getProperty("cores");
+			}
+			
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			if (prop.containsKey("ram")) {
 				this.ram = prop.getProperty("ram");
 			}
@@ -268,10 +332,13 @@ public class SettingsLoader {
 				this.ui = prop.getProperty("ui");
 			}
 			
+<<<<<<< HEAD
 			if (prop.containsKey("tile-size")) {
 				this.tileSize = prop.getProperty("tile-size");
 			}
 			
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			if (prop.containsKey("priority")) {
 				this.priority = Integer.parseInt(prop.getProperty("priority"));
 			}
@@ -302,10 +369,17 @@ public class SettingsLoader {
 		
 		loadFile();
 		
+<<<<<<< HEAD
 		if (config.login().isEmpty() && login != null) {
 			config.setLogin(login);
 		}
 		if (config.password().isEmpty() && password != null) {
+=======
+		if (config.getLogin().isEmpty() && login != null) {
+			config.setLogin(login);
+		}
+		if (config.getPassword().isEmpty() && password != null) {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			config.setPassword(password);
 		}
 		
@@ -332,6 +406,7 @@ public class SettingsLoader {
 		if (config.getGPUDevice() == null && gpu != null) {
 			GPUDevice device = GPU.getGPUDevice(gpu);
 			if (device != null) {
+<<<<<<< HEAD
 				config.setUseGPU(device);
 			}
 		}
@@ -341,13 +416,28 @@ public class SettingsLoader {
 		
 		if (config.getMaxMemory() == -1 && ram != null) {
 			config.setMaxMemory(Integer.valueOf(ram));
+=======
+				config.setGPUDevice(device);
+			}
+		}
+		if (config.getNbCores() == -1 && cores != null) {
+			config.setNbCores(Integer.valueOf(cores));
+		}
+		
+		if (config.getMaxMemory() == -1 && ram != null) {
+			config.setMaxMemory(Utils.parseNumber(ram) / 1000); // internal ram value is in kB
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		
 		if (config.getMaxRenderTime() == -1 && renderTime != null) {
 			config.setMaxRenderTime(Integer.valueOf(renderTime));
 		}
 		
+<<<<<<< HEAD
 		if (config.getUserSpecifiedACacheDir() == false && cacheDir != null && new File(cacheDir).exists()) {
+=======
+		if (config.isUserHasSpecifiedACacheDir() == false && cacheDir != null) {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			config.setCacheDir(new File(cacheDir));
 		}
 		
@@ -355,10 +445,13 @@ public class SettingsLoader {
 			config.setUIType(ui);
 		}
 		
+<<<<<<< HEAD
 		if (config.getTileSize() == -1 && tileSize != null) {
 			config.setTileSize(Integer.valueOf(tileSize));
 		}
 		
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		config.setAutoSignIn(Boolean.valueOf(autoSignIn));
 	}
 	

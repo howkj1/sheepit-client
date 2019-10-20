@@ -24,6 +24,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+<<<<<<< HEAD
+=======
+import java.io.PrintWriter;
+import java.io.StringWriter;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.DigestInputStream;
@@ -49,7 +54,11 @@ import com.sheepit.client.Error.ServerCode;
 import com.sheepit.client.exception.FermeExceptionNoSpaceLeftOnDevice;
 
 public class Utils {
+<<<<<<< HEAD
 	public static int unzipFileIntoDirectory(String zipFileName_, String destinationDirectory, String password) throws FermeExceptionNoSpaceLeftOnDevice {
+=======
+	public static int unzipFileIntoDirectory(String zipFileName_, String destinationDirectory, String password, Log log) throws FermeExceptionNoSpaceLeftOnDevice {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		try {
 			ZipFile zipFile = new ZipFile(zipFileName_);
 			UnzipParameters unzipParameters = new UnzipParameters();
@@ -61,7 +70,14 @@ public class Utils {
 			zipFile.extractAll(destinationDirectory, unzipParameters);
 		}
 		catch (ZipException e) {
+<<<<<<< HEAD
 			e.printStackTrace();
+=======
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			log.debug("Utils::unzipFileIntoDirectory(" + zipFileName_ + "," + destinationDirectory + ") exception " + e + " stacktrace: " + sw.toString());
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			return -1;
 		}
 		return 0;
@@ -141,6 +157,10 @@ public class Utils {
 		file.delete();
 	}
 	
+	/**
+	 * Parse a number string to a number.
+	 * Input can be as "32", "10k", "100K", "100G", "1.3G", "0.4T"
+	 */
 	public static long parseNumber(String in) {
 		in = in.trim();
 		in = in.replaceAll(",", ".");
@@ -153,18 +173,22 @@ public class Utils {
 		m.find();
 		int scale = 1;
 		switch (m.group(2).charAt(0)) {
-			case 'G':
-				scale *= 1000;
-			case 'g':
-				scale *= 1000;
-			case 'M':
-				scale *= 1000;
-			case 'm':
-				scale *= 1000;
-			case 'K':
+			case 'T':
+			case 't':
+				scale = 1000 * 1000 * 1000 * 1000;
 				break;
-			default:
-				return 0;
+			case 'G':
+			case 'g':
+				scale = 1000 * 1000 * 1000;
+				break;
+			case 'M':
+			case 'm':
+				scale = 1000 * 1000;
+				break;
+			case 'K':
+			case 'k':
+				scale = 1000;
+				break;
 		}
 		return Math.round(Double.parseDouble(m.group(1)) * scale);
 	}

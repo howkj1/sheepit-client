@@ -38,8 +38,14 @@ import com.sheepit.client.Log;
 import com.sheepit.client.Pair;
 import com.sheepit.client.SettingsLoader;
 import com.sheepit.client.ShutdownHook;
+import com.sheepit.client.Utils;
 import com.sheepit.client.hardware.gpu.GPU;
 import com.sheepit.client.hardware.gpu.GPUDevice;
+<<<<<<< HEAD
+=======
+import com.sheepit.client.hardware.gpu.nvidia.Nvidia;
+import com.sheepit.client.hardware.gpu.opencl.OpenCL;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 import com.sheepit.client.network.Proxy;
 
 public class Worker {
@@ -58,8 +64,11 @@ public class Worker {
 	@Option(name = "-max-uploading-job", usage = "", metaVar = "1", required = false)
 	private int max_upload = -1;
 	
-	@Option(name = "-gpu", usage = "CUDA name of the GPU used for the render, for example CUDA_0", metaVar = "CUDA_0", required = false)
+	@Option(name = "-gpu", usage = "Name of the GPU used for the render, for example CUDA_0 for Nvidia or OPENCL_0 for AMD/Intel card", metaVar = "CUDA_0", required = false)
 	private String gpu_device = null;
+	
+	@Option(name = "--no-gpu", usage = "Don't detect GPUs", required = false)
+	private boolean no_gpu_detection = false;
 	
 	@Option(name = "-compute-method", usage = "CPU: only use cpu, GPU: only use gpu, CPU_GPU: can use cpu and gpu (not at the same time) if -gpu is not use it will not use the gpu", metaVar = "CPU", required = false)
 	private String method = null;
@@ -67,8 +76,13 @@ public class Worker {
 	@Option(name = "-cores", usage = "Number of cores/threads to use for the render", metaVar = "3", required = false)
 	private int nb_cores = -1;
 	
+<<<<<<< HEAD
 	@Option(name = "-memory", usage = "Maximum memory allow to be used by renderer (in MB)", required = false)
 	private int max_ram = -1;
+=======
+	@Option(name = "-memory", usage = "Maximum memory allow to be used by renderer, number with unit (800M, 2G, ...)", required = false)
+	private String max_ram = null;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	
 	@Option(name = "-rendertime", usage = "Maximum time allow for each frame (in minute)", required = false)
 	private int max_rendertime = -1;
@@ -102,6 +116,12 @@ public class Worker {
 	
 	@Option(name = "-priority", usage = "Set render process priority (19 lowest to -19 highest)", required = false)
 	private int priority = 19;
+<<<<<<< HEAD
+=======
+
+	@Option(name = "-title", usage = "Custom title for the GUI Client", required = false)
+	private String title = "SheepIt Render Farm";
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	
 	public static void main(String[] args) {
 		new Worker().doMain(args);
@@ -125,6 +145,10 @@ public class Worker {
 		Configuration config = new Configuration(null, login, password);
 		config.setPrintLog(print_log);
 		config.setUsePriority(priority);
+<<<<<<< HEAD
+=======
+		config.setDetectGPUs(! no_gpu_detection);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		
 		if (cache_dir != null) {
 			File a_dir = new File(cache_dir);
@@ -143,30 +167,27 @@ public class Worker {
 		}
 		
 		if (gpu_device != null) {
-			String cuda_str = "CUDA_";
-			if (gpu_device.startsWith(cuda_str) == false) {
-				System.err.println("CUDA_DEVICE should look like 'CUDA_X' where X is a number");
-				return;
+			if (gpu_device.startsWith(Nvidia.TYPE) == false && gpu_device.startsWith(OpenCL.TYPE) == false) {
+				System.err.println("GPU_ID should look like '" + Nvidia.TYPE + "_X' or '" + OpenCL.TYPE + "_X' more info on gpus available with --show-gpu");
+				System.exit(2);
 			}
-			try {
-				Integer.parseInt(gpu_device.substring(cuda_str.length()));
-			}
-			catch (NumberFormatException en) {
-				System.err.println("CUDA_DEVICE should look like 'CUDA_X' where X is a number");
+			String family = "";
+			if (gpu_device.startsWith(Nvidia.TYPE) == false && gpu_device.startsWith(OpenCL.TYPE) == false) {
+				System.err.println("GPU_ID should look like '" + Nvidia.TYPE + "_X' or '" + OpenCL.TYPE + "_X' more info on gpus available with --show-gpu");
 				return;
 			}
 			GPUDevice gpu = GPU.getGPUDevice(gpu_device);
 			if (gpu == null) {
-				System.err.println("GPU unknown");
+				System.err.println("GPU unknown, list of available gpus can be display with --show-gpu");
 				System.exit(2);
 			}
-			config.setUseGPU(gpu);
+			config.setGPUDevice(gpu);
 		}
 		
 		if (request_time != null) {
 			String[] intervals = request_time.split(",");
 			if (intervals != null) {
-				config.requestTime = new LinkedList<Pair<Calendar, Calendar>>();
+				config.setRequestTime(new LinkedList<Pair<Calendar, Calendar>>());
 				
 				SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
 				for (String interval : intervals) {
@@ -185,7 +206,7 @@ public class Worker {
 						}
 						
 						if (start.before(end)) {
-							config.requestTime.add(new Pair<Calendar, Calendar>(start, end));
+							config.getRequestTime().add(new Pair<Calendar, Calendar>(start, end));
 						}
 						else {
 							System.err.println("Error: wrong request time " + times[0] + " is after " + times[1]);
@@ -201,11 +222,22 @@ public class Worker {
 			return;
 		}
 		else {
-			config.setUseNbCores(nb_cores);
+			config.setNbCores(nb_cores);
 		}
 		
+<<<<<<< HEAD
 		if (max_ram > 0) {
 			config.setMaxMemory(max_ram * 1000);
+=======
+		if (max_ram != null) {
+			try {
+				config.setMaxMemory(Utils.parseNumber(max_ram) / 1000); // internal value are in kB
+			}
+			catch (java.lang.IllegalStateException e) {
+				System.err.println("Error: failed to parse memory parameter");
+				return;
+			}
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		
 		if (max_rendertime > 0) {
@@ -261,7 +293,11 @@ public class Worker {
 			System.exit(2);
 		}
 		else if (compute_method == ComputeType.CPU) {
+<<<<<<< HEAD
 			config.setUseGPU(null); // remove the GPU
+=======
+			config.setGPUDevice(null); // remove the GPU
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		
 		config.setComputeMethod(compute_method);
@@ -276,6 +312,10 @@ public class Worker {
 				System.err.println("Aborting");
 				System.exit(2);
 			}
+<<<<<<< HEAD
+=======
+			config.setConfigFilePath(config_file);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			new SettingsLoader(config_file).merge(config);
 		}
 		
@@ -288,7 +328,11 @@ public class Worker {
 		}
 		switch (type) {
 			case GuiTextOneLine.type:
+<<<<<<< HEAD
 				if (config.getPrintLog()) {
+=======
+				if (config.isPrintLog()) {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 					System.out.println("OneLine UI can not be used if verbose mode is enabled");
 					System.exit(2);
 				}
@@ -304,7 +348,11 @@ public class Worker {
 					System.out.println("You should set a DISPLAY or use a text ui (with -ui " + GuiTextOneLine.type + " or -ui " + GuiText.type + ").");
 					System.exit(3);
 				}
+<<<<<<< HEAD
 				gui = new GuiSwing(no_systray == false);
+=======
+				gui = new GuiSwing(no_systray == false, title);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 				break;
 		}
 		Client cli = new Client(gui, config, server);

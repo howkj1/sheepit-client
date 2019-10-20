@@ -19,25 +19,43 @@
 
 package com.sheepit.client;
 
+<<<<<<< HEAD
 import java.util.Date;
 
 public class RenderProcess {
 	private long start;
 	private long end;
 	private int remainingDuration;
+=======
+import lombok.Data;
+
+import java.util.Date;
+
+@Data
+public class RenderProcess {
+	private long startTime;
+	private long endTime;
+	private int remainingDuration; // in seconds
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	private long memoryUsed; // in kB
 	private int coresUsed;
 	private Process process;
 	
 	public RenderProcess() {
 		process = null;
+<<<<<<< HEAD
 		start = -1;
 		end = -1;
+=======
+		startTime = -1;
+		endTime = -1;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		memoryUsed = 0;
 		coresUsed = 0;
 		remainingDuration = 0;
 	}
 	
+<<<<<<< HEAD
 	public void setMemoryUsed(long val) {
 		memoryUsed = val;
 	}
@@ -62,20 +80,31 @@ public class RenderProcess {
 		return end;
 	}
 	
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	/**
 	 * 
 	 * @return duration in seconds
 	 */
 	public int getDuration() {
+<<<<<<< HEAD
 		if (start != -1 && end != -1) {
 			return (int) ((end - start) / 1000);
 		}
 		else if (start != -1) {
 			return (int) ((new Date().getTime() - start) / 1000);
+=======
+		if (startTime != -1 && endTime != -1) {
+			return (int) ((endTime - startTime) / 1000);
+		}
+		else if (startTime != -1) {
+			return (int) ((new Date().getTime() - startTime) / 1000);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		return 0;
 	}
 	
+<<<<<<< HEAD
 	/**
 	 * 
 	 * @return duration in seconds
@@ -90,11 +119,19 @@ public class RenderProcess {
 	
 	public void finish() {
 		end = new Date().getTime();
+=======
+	public void finish() {
+		endTime = new Date().getTime();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		process = null;
 	}
 	
 	public void start() {
+<<<<<<< HEAD
 		start = new Date().getTime();
+=======
+		startTime = new Date().getTime();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 	}
 	
 	public int exitValue() {
@@ -118,6 +155,7 @@ public class RenderProcess {
 		}
 		return value;
 	}
+<<<<<<< HEAD
 	
 	public void setProcess(Process val) {
 		process = val;
@@ -126,4 +164,6 @@ public class RenderProcess {
 	public Process getProcess() {
 		return process;
 	}
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 }

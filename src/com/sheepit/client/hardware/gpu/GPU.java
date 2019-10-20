@@ -24,16 +24,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.sheepit.client.Configuration;
+import com.sheepit.client.hardware.gpu.nvidia.Nvidia;
+import com.sheepit.client.hardware.gpu.opencl.OpenCL;
 import com.sheepit.client.os.OS;
+<<<<<<< HEAD
 import com.sun.jna.Native;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
+=======
+import com.sheepit.client.os.Windows;
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 
 public class GPU {
 	public static List<GPUDevice> devices = null;
 	
 	public static boolean generate() {
 		devices = new LinkedList<GPUDevice>();
+<<<<<<< HEAD
 		
 		OS os = OS.getOS();
 		String path = os.getCUDALib();
@@ -133,6 +141,19 @@ public class GPU {
 			aDevice.setCudaName("CUDA_" + Integer.toString(i));
 			devices.add(aDevice);
 			i++;
+=======
+		List<GPUDevice> gpus = new Nvidia().getGpus();
+		if (gpus != null) {
+			devices.addAll(gpus);
+		}
+		
+		OS os = OS.getOS();
+		if (os instanceof Windows) { // opencl detection will crash on Mac (and sometimes on Linux) 
+			gpus = new OpenCL().getGpus();
+			if (gpus != null) {
+				devices.addAll(gpus);
+			}
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		
 		return true;
@@ -150,16 +171,32 @@ public class GPU {
 		return devs;
 	}
 	
+<<<<<<< HEAD
 	public static List<GPUDevice> listDevices() {
 		if (devices == null) {
 			generate();
+=======
+	public static List<GPUDevice> listDevices(Configuration config) {
+		if (devices == null) {
+			if (config.isDetectGPUs()) {
+				generate();
+			}
+			else {
+				devices = new LinkedList<GPUDevice>();
+			}
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		
 		return devices;
 	}
 	
+<<<<<<< HEAD
 	public static GPUDevice getGPUDevice(String device_model) {
 		if (device_model == null) {
+=======
+	public static GPUDevice getGPUDevice(String deviceId) {
+		if (deviceId == null) {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			return null;
 		}
 		
@@ -172,7 +209,7 @@ public class GPU {
 		}
 		
 		for (GPUDevice dev : devices) {
-			if (device_model.equals(dev.getCudaName()) || device_model.equals(dev.getModel())) {
+			if (deviceId.equals(dev.getId()) || deviceId.equals(dev.getOldId())) {
 				return dev;
 			}
 		}

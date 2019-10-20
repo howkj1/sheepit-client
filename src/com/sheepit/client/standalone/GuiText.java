@@ -133,6 +133,7 @@ public class GuiText implements Gui {
 	@Override
 	public void setClient(Client cli) {
 		client = cli;
+<<<<<<< HEAD
 	}
 	
 	@Override
@@ -143,6 +144,22 @@ public class GuiText implements Gui {
 	@Override
 	public Client getClient() {
 		return client;
+=======
 	}
 	
+	@Override
+	public void setComputeMethod(String computeMethod) {
+		System.out.println("Compute method: " + computeMethod);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
+	}
+	
+	@Override
+	public Client getClient() {
+		return client;
+	}
+	
+	@Override
+	public void successfulAuthenticationEvent(String publickey) {
+	
+	}
 }

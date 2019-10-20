@@ -1,2 +1,10 @@
+<<<<<<< HEAD
 build
 bin
+=======
+.idea/workspace.xml
+.gradle
+build
+out
+
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee

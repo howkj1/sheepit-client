@@ -33,9 +33,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException;
+import java.net.UnknownHostException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
@@ -44,7 +47,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
@@ -54,21 +56,15 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import com.sheepit.client.datamodel.CacheFileMD5;
+import com.sheepit.client.datamodel.FileMD5;
+import com.sheepit.client.datamodel.HeartBeatInfos;
+import com.sheepit.client.datamodel.JobInfos;
+import com.sheepit.client.datamodel.JobValidation;
+import com.sheepit.client.datamodel.ServerConfig;
+import lombok.Getter;
+import org.simpleframework.xml.core.Persister;
 
 import com.sheepit.client.Configuration.ComputeType;
 import com.sheepit.client.Error.ServerCode;
@@ -86,10 +82,12 @@ import com.sheepit.client.os.OS;
 
 public class Server extends Thread implements HostnameVerifier, X509TrustManager {
 	private String base_url;
+
+	@Getter
+	private ServerConfig serverConfig;
+
 	private Configuration user_config;
 	private Client client;
-	private ArrayList<String> cookies;
-	private HashMap<String, String> pages;
 	private Log log;
 	private long lastRequestTime;
 	private int keepmealive_duration; // time in ms
@@ -99,11 +97,12 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 		this.base_url = url_;
 		this.user_config = user_config_;
 		this.client = client_;
-		this.pages = new HashMap<String, String>();
-		this.cookies = new ArrayList<String>();
 		this.log = Log.getInstance(this.user_config);
 		this.lastRequestTime = 0;
 		this.keepmealive_duration = 15 * 60 * 1000; // default 15min
+		
+		CookieManager cookies = new CookieManager();
+		CookieHandler.setDefault(cookies);
 	}
 	
 	public void run() {
@@ -132,9 +131,15 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 					if (connection.getResponseCode() == HttpURLConnection.HTTP_OK && connection.getContentType().startsWith("text/xml")) {
 						DataInputStream in = new DataInputStream(connection.getInputStream());
 						try {
+<<<<<<< HEAD
 							Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
 							ServerCode ret = Utils.statusIsOK(document, "keepmealive");
 							if (ret == ServerCode.KEEPMEALIVE_STOP_RENDERING) {
+=======
+							HeartBeatInfos heartBeartInfos = new Persister().read(HeartBeatInfos.class, in);
+							ServerCode serverCode = ServerCode.fromInt(heartBeartInfos.getStatus());
+							if (serverCode == ServerCode.KEEPMEALIVE_STOP_RENDERING) {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 								this.log.debug("Server::stayAlive server asked to kill local render process");
 								// kill the current process, it will generate an error but it's okay
 								if (this.client != null && this.client.getRenderingJob() != null && this.client.getRenderingJob().getProcessRender().getProcess() != null) {
@@ -144,9 +149,8 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 								}
 							}
 						}
-						catch (SAXException e) {
-						}
-						catch (ParserConfigurationException e) {
+						catch (Exception e) { // for the read
+							this.log.debug("Server::stayAlive Exception " + e);
 						}
 					}
 				}
@@ -176,17 +180,24 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 	}
 	
 	public String toString() {
-		return String.format("Server (base_url '%s', user_config %s, pages %s", this.base_url, this.user_config, this.pages);
+		return String.format("Server (base_url '%s', user_config %s", this.base_url, this.user_config);
 	}
 	
 	public Error.Type getConfiguration() {
 		OS os = OS.getOS();
 		HttpURLConnection connection = null;
+		String publickey = null;
 		try {
 			String url_remote = this.base_url + "/server/config.php";
+<<<<<<< HEAD
 			String parameters = String.format("login=%s&password=%s&cpu_family=%s&cpu_model=%s&cpu_model_name=%s&cpu_cores=%s&os=%s&ram=%s&bits=%s&version=%s&hostname=%s&extras=%s", 
 				URLEncoder.encode(this.user_config.login(), "UTF-8"),
 				URLEncoder.encode(this.user_config.password(), "UTF-8"),
+=======
+			String parameters = String.format("login=%s&password=%s&cpu_family=%s&cpu_model=%s&cpu_model_name=%s&cpu_cores=%s&os=%s&ram=%s&bits=%s&version=%s&hostname=%s&ui=%s&extras=%s", 
+				URLEncoder.encode(this.user_config.getLogin(), "UTF-8"),
+				URLEncoder.encode(this.user_config.getPassword(), "UTF-8"),
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 				URLEncoder.encode(os.getCPU().family(), "UTF-8"),
 				URLEncoder.encode(os.getCPU().model(), "UTF-8"),
 				URLEncoder.encode(os.getCPU().name(), "UTF-8"),
@@ -196,6 +207,10 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 				URLEncoder.encode(os.getCPU().arch(), "UTF-8"),
 				this.user_config.getJarVersion(),
 				URLEncoder.encode(this.user_config.getHostname(), "UTF-8"),
+<<<<<<< HEAD
+=======
+				this.client.getGui().getClass().getSimpleName(),
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 				this.user_config.getExtras());
 			this.log.debug("Server::getConfiguration url " + url_remote);
 			
@@ -205,53 +220,21 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 			
 			if (r == HttpURLConnection.HTTP_OK && contentType.startsWith("text/xml")) {
 				DataInputStream in = new DataInputStream(connection.getInputStream());
-				Document document = null;
+				serverConfig = new Persister().read(ServerConfig.class, in);
 				
-				try {
-					document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
-				}
-				catch (SAXException e) {
-					this.log.error("getConfiguration error: failed to parse XML SAXException " + e);
-					return Error.Type.WRONG_CONFIGURATION;
-				}
-				catch (IOException e) {
-					this.log.error("getConfiguration error: failed to parse XML IOException " + e);
-					return Error.Type.WRONG_CONFIGURATION;
-				}
-				catch (ParserConfigurationException e) {
-					this.log.error("getConfiguration error: failed to parse XML ParserConfigurationException " + e);
-					return Error.Type.WRONG_CONFIGURATION;
+				if (ServerCode.fromInt(serverConfig.getStatus()) != ServerCode.OK) {
+					return Error.ServerCodeToType(ServerCode.fromInt(serverConfig.getStatus()));
 				}
 				
-				ServerCode ret = Utils.statusIsOK(document, "config");
-				if (ret != ServerCode.OK) {
-					return Error.ServerCodeToType(ret);
+				publickey = serverConfig.getPublickey();
+				if (publickey.isEmpty()) {
+					publickey = null;
 				}
-				
-				Element config_node = null;
-				NodeList ns = null;
-				ns = document.getElementsByTagName("config");
-				if (ns.getLength() == 0) {
-					this.log.error("getConfiguration error: failed to parse XML, no node 'config'");
-					return Error.Type.WRONG_CONFIGURATION;
-				}
-				config_node = (Element) ns.item(0);
-				
-				ns = config_node.getElementsByTagName("request");
-				if (ns.getLength() == 0) {
-					this.log.error("getConfiguration error: failed to parse XML, node 'config' has no child node 'request'");
-					return Error.Type.WRONG_CONFIGURATION;
-				}
-				for (int i = 0; i < ns.getLength(); i++) {
-					Element element = (Element) ns.item(i);
-					if (element.hasAttribute("type") && element.hasAttribute("path")) {
-						this.pages.put(element.getAttribute("type"), element.getAttribute("path"));
-						if (element.getAttribute("type").equals("keepmealive") && element.hasAttribute("max-period")) {
-							this.keepmealive_duration = (Integer.parseInt(element.getAttribute("max-period")) - 120) * 1000; // put 2min of safety net
-						}
-					}
+				else {
+					this.user_config.setPassword(publickey);
 				}
 			}
+<<<<<<< HEAD
 			else if (r == HttpURLConnection.HTTP_OK && contentType.startsWith("text/html")) {
 				return Error.Type.ERROR_BAD_RESPONSE;
 			}
@@ -259,9 +242,23 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 				this.log.error("Server::getConfiguration: Invalid response " + contentType + " " + r);
 				return Error.Type.WRONG_CONFIGURATION;
 			}
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		}
 		catch (ConnectException e) {
 			this.log.error("Server::getConfiguration error ConnectException " + e);
+			return Error.Type.NETWORK_ISSUE;
+		}
+<<<<<<< HEAD
+		catch (UnsupportedEncodingException e) {
+			this.log.error("Server::getConfiguration: exception UnsupportedEncodingException " + e);
+			return Error.Type.UNKNOWN;
+		}
+		catch (IOException e) {
+			this.log.error("Server::getConfiguration: exception IOException " + e);
+=======
+		catch (UnknownHostException e) {
+			this.log.error("Server::getConfiguration: exception UnknownHostException " + e);
 			return Error.Type.NETWORK_ISSUE;
 		}
 		catch (UnsupportedEncodingException e) {
@@ -272,11 +269,19 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 			this.log.error("Server::getConfiguration: exception IOException " + e);
 			return Error.Type.UNKNOWN;
 		}
+		catch (Exception e) {
+			this.log.error("Server::getConfiguration: exception Exception " + e);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
+			return Error.Type.UNKNOWN;
+		}
 		finally {
 			if (connection != null) {
 				connection.disconnect();
 			}
 		}
+		
+		this.client.getGui().successfulAuthenticationEvent(publickey);
+		
 		return Error.Type.OK;
 	}
 	
@@ -287,7 +292,19 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 		HttpURLConnection connection = null;
 		try {
 			OS os = OS.getOS();
+<<<<<<< HEAD
 			String url = String.format("%s?computemethod=%s&cpu_cores=%s&ram_max=%s&rendertime_max=%s", this.getPage("request-job"), this.user_config.computeMethodToInt(), ((this.user_config.getNbCores() == -1) ? os.getCPU().cores() : this.user_config.getNbCores()), this.user_config.getMaxMemory(), this.user_config.getMaxRenderTime());
+=======
+			long maxMemory = this.user_config.getMaxMemory();
+			long freeMemory = os.getFreeMemory();
+			if (maxMemory < 0) {
+				maxMemory = freeMemory;
+			}
+			else if (freeMemory > 0 && maxMemory > 0) {
+				maxMemory = Math.min(maxMemory, freeMemory);
+			}
+			String url = String.format("%s?computemethod=%s&cpu_cores=%s&ram_max=%s&rendertime_max=%s", this.getPage("request-job"), this.user_config.computeMethodToInt(), ((this.user_config.getNbCores() == -1) ? os.getCPU().cores() : this.user_config.getNbCores()), maxMemory, this.user_config.getMaxRenderTime());
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			if (this.user_config.getComputeMethod() != ComputeType.CPU && this.user_config.getGPUDevice() != null) {
 				String gpu_model = "";
 				try {
@@ -295,7 +312,7 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 				}
 				catch (UnsupportedEncodingException e) {
 				}
-				url += "&gpu_model=" + gpu_model + "&gpu_ram=" + this.user_config.getGPUDevice().getMemory();
+				url += "&gpu_model=" + gpu_model + "&gpu_ram=" + this.user_config.getGPUDevice().getMemory() + "&gpu_type=" + this.user_config.getGPUDevice().getType();
 			}
 			
 			connection = this.HTTPRequest(url, this.generateXMLForMD5cache());
@@ -305,6 +322,7 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 			
 			if (r == HttpURLConnection.HTTP_OK && contentType.startsWith("text/xml")) {
 				DataInputStream in = new DataInputStream(connection.getInputStream());
+<<<<<<< HEAD
 				Document document = null;
 				try {
 					document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
@@ -400,39 +418,75 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 				
 				String[] job_node_require_attribute = { "id", "archive_md5", "path", "use_gpu", "frame", "name", "extras", "password" };
 				String[] renderer_node_require_attribute = { "md5", "commandline" };
+=======
+
+				JobInfos jobData = new Persister().read(JobInfos.class, in);
+
+				handleFileMD5DeleteDocument(jobData.getFileMD5s());
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 				
-				for (String e : job_node_require_attribute) {
-					if (job_node.hasAttribute(e) == false) {
-						throw new FermeException("error requestJob: parseXML failed, job_node have to attribute '" + e + "'");
+				if (jobData.getSessionStats() != null) {
+					this.client.getGui().displayStats(new Stats(
+							jobData.getSessionStats().getRemainingFrames(),
+							jobData.getSessionStats().getPointsEarnedByUser(),
+							jobData.getSessionStats().getPointsEarnedOnSession(),
+							jobData.getSessionStats().getRenderableProjects(),
+							jobData.getSessionStats().getWaitingProjects(),
+							jobData.getSessionStats().getConnectedMachines()));
+				}
+
+				ServerCode serverCode = ServerCode.fromInt(jobData.getStatus());
+				if (serverCode != ServerCode.OK) {
+					switch (serverCode) {
+						case JOB_REQUEST_NOJOB:
+							return null;
+						case JOB_REQUEST_ERROR_NO_RENDERING_RIGHT:
+							throw new FermeExceptionNoRightToRender();
+						case JOB_REQUEST_ERROR_DEAD_SESSION:
+							throw new FermeExceptionNoSession();
+						case JOB_REQUEST_ERROR_SESSION_DISABLED:
+							throw new FermeExceptionSessionDisabled();
+						case JOB_REQUEST_ERROR_INTERNAL_ERROR:
+							throw new FermeExceptionBadResponseFromServer();
+						case JOB_REQUEST_ERROR_RENDERER_NOT_AVAILABLE:
+							throw new FermeExceptionNoRendererAvailable();
+						case JOB_REQUEST_SERVER_IN_MAINTENANCE:
+							throw new FermeExceptionServerInMaintenance();
+						case JOB_REQUEST_SERVER_OVERLOADED:
+							throw new FermeExceptionServerOverloaded();
+						default:
+							throw new FermeException("error requestJob: status is not ok (it's " + serverCode + ")");
 					}
 				}
+
+				String script = "import bpy\n";
+				// blender 2.7x
+				script += "try:\n";
+				script += "\tbpy.context.user_preferences.filepaths.temporary_directory = \"" + this.user_config.getWorkingDirectory().getAbsolutePath().replace("\\", "\\\\") + "\"\n";
+				script += "except AttributeError:\n";
+				script += "\tpass\n";
 				
-				for (String e : renderer_node_require_attribute) {
-					if (renderer_node.hasAttribute(e) == false) {
-						throw new FermeException("error requestJob: parseXML failed, renderer_node have to attribute '" + e + "'");
-					}
-				}
+				// blender 2.80
+				script += "try:\n";
+				script += "\tbpy.context.preferences.filepaths.temporary_directory = \"" + this.user_config.getWorkingDirectory().getAbsolutePath().replace("\\", "\\\\") + "\"\n";
+				script += "except AttributeError:\n";
+				script += "\tpass\n";
 				
-				boolean use_gpu = (job_node.getAttribute("use_gpu").compareTo("1") == 0);
-				boolean synchronous_upload = true;
-				if (job_node.hasAttribute("synchronous_upload")) {
-					synchronous_upload = (job_node.getAttribute("synchronous_upload").compareTo("1") == 0);
-				}
-				
-				String frame_extras = "";
-				if (job_node.hasAttribute("extras")) {
-					frame_extras = job_node.getAttribute("extras");
-				}
-				
+<<<<<<< HEAD
 				String update_method = null;
 				if (renderer_node.hasAttribute("update_method")) {
 					update_method = renderer_node.getAttribute("update_method");
 				}
 				
+=======
+				script += jobData.getRenderTask().getScript();
+
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 				Job a_job = new Job(
 						this.user_config,
 						this.client.getGui(),
 						this.client.getLog(),
+<<<<<<< HEAD
 						job_node.getAttribute("id"),
 						job_node.getAttribute("frame"),
 						job_node.getAttribute("path").replace("/", File.separator),
@@ -449,6 +503,22 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 						);
 				
 				this.client.getGui().displayStats(new Stats(remaining_frames, credits_earned, credits_earned_session, waiting_project, connected_machine));
+=======
+						jobData.getRenderTask().getId(),
+						jobData.getRenderTask().getFrame(),
+						jobData.getRenderTask().getPath().replace("/", File.separator),
+						jobData.getRenderTask().getUseGpu() == 1,
+						jobData.getRenderTask().getRendererInfos().getCommandline(),
+						script,
+						jobData.getRenderTask().getArchive_md5(),
+						jobData.getRenderTask().getRendererInfos().getMd5(),
+						jobData.getRenderTask().getName(),
+						jobData.getRenderTask().getPassword(),
+						jobData.getRenderTask().getExtras(),
+						jobData.getRenderTask().getSynchronous_upload().equals("1"),
+						jobData.getRenderTask().getRendererInfos().getUpdate_method()
+				);
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 				
 				return a_job;
 			}
@@ -472,8 +542,16 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 		}
 		catch (FermeException e) {
 			throw e;
+<<<<<<< HEAD
 		}
 		catch (NoRouteToHostException e) {
+=======
+		}
+		catch (NoRouteToHostException e) {
+			throw new FermeServerDown();
+		}
+		catch (UnknownHostException e) {
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			throw new FermeServerDown();
 		}
 		catch (Exception e) {
@@ -489,7 +567,7 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 		}
 		throw new FermeException("error requestJob, end of function");
 	}
-	
+
 	public HttpURLConnection HTTPRequest(String url_) throws IOException {
 		return this.HTTPRequest(url_, null);
 	}
@@ -504,9 +582,6 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 		connection.setDoOutput(true);
 		connection.setInstanceFollowRedirects(true);
 		connection.setRequestMethod("GET");
-		for (String cookie : this.cookies) {
-			connection.setRequestProperty("Cookie", cookie);
-		}
 		
 		if (url_.startsWith("https://")) {
 			try {
@@ -542,20 +617,8 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 			out.close();
 		}
 		
-		String headerName = null;
-		for (int i = 1; (headerName = connection.getHeaderFieldKey(i)) != null; i++) {
-			if (headerName.equals("Set-Cookie")) {
-				String cookie = connection.getHeaderField(i);
-				
-				boolean cookieIsPresent = false;
-				for (String value : this.cookies) {
-					if (value.equalsIgnoreCase(cookie))
-						cookieIsPresent = true;
-				}
-				if (!cookieIsPresent)
-					this.cookies.add(cookie);
-			}
-		}
+		// actually use the connection to, in case of timeout, generate an exception
+		connection.getResponseCode();
 		
 		// actually use the connection to, in case of timeout, generate an exception
 		connection.getResponseCode();
@@ -593,6 +656,7 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 			}
 			fos.close();
 			inStrm.close();
+			gui_.status(String.format(status_, 100));
 			long end = new Date().getTime();
 			this.log.debug(String.format("File downloaded at %.1f kB/s, written %d B", ((float) (size / 1000)) / ((float) (end - start) / 1000), written));
 			this.lastRequestTime = new Date().getTime();
@@ -640,9 +704,6 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 			conn.setDoOutput(true);
 			conn.setInstanceFollowRedirects(true);
 			conn.setUseCaches(false);
-			for (String cookie : this.cookies) {
-				conn.setRequestProperty("Cookie", cookie);
-			}
 			
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Connection", "Keep-Alive");
@@ -757,8 +818,9 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 				this.log.debug("Server::HTTPSendFile IOException " + e + " stacktrace: " + sw.toString());
 				return ServerCode.UNKNOWN;
 			}
-			Document document = null;
+
 			try {
+<<<<<<< HEAD
 				document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
 			}
 			catch (SAXException e) {
@@ -781,15 +843,22 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 				e.printStackTrace(pw);
 				this.log.debug("Server::HTTPSendFile ParserConfigurationException " + e + " stacktrace: " + sw.toString());
 				return ServerCode.UNKNOWN;
+=======
+				JobValidation jobValidation = new Persister().read(JobValidation.class, in);
+				
+				this.lastRequestTime = new Date().getTime();
+
+				ServerCode serverCode = ServerCode.fromInt(jobValidation.getStatus());
+				if (serverCode != ServerCode.OK) {
+					this.log.error("Server::HTTPSendFile wrong status (is " + serverCode + ")");
+					return serverCode;
+				}
+			}
+			catch (Exception e) { // for the .read
+				e.printStackTrace();
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 			}
 			
-			this.lastRequestTime = new Date().getTime();
-			
-			ServerCode ret1 = Utils.statusIsOK(document, "jobvalidate");
-			if (ret1 != ServerCode.OK) {
-				this.log.error("Server::HTTPSendFile wrong status (is " + ret1 + ")");
-				return ret1;
-			}
 			return ServerCode.OK;
 		}
 		else if (r == HttpURLConnection.HTTP_OK && contentType.startsWith("text/html")) {
@@ -813,6 +882,7 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 	}
 	
 	public byte[] getLastRender() {
+<<<<<<< HEAD
 		try {
 			HttpURLConnection httpCon = this.HTTPRequest(this.getPage("last-render-frame"));
 			
@@ -850,72 +920,92 @@ public class Server extends Thread implements HostnameVerifier, X509TrustManager
 	
 	private String generateXMLForMD5cache() {
 		String xml_str = null;
+=======
+>>>>>>> 73a98e49f183350391a23ecff48a759a8c434fee
 		try {
-			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			Document document_cache = docBuilder.newDocument();
+			HttpURLConnection httpCon = this.HTTPRequest(this.getPage("last-render-frame"));
 			
-			Element rootElement = document_cache.createElement("cache");
-			document_cache.appendChild(rootElement);
+			InputStream inStrm = httpCon.getInputStream();
+			if (httpCon.getResponseCode() != HttpURLConnection.HTTP_OK) {
+				this.log.debug("Server::getLastRender code not ok " + httpCon.getResponseCode());
+				return null;
+			}
+			int size = httpCon.getContentLength();
 			
-			List<File> local_files = this.user_config.getLocalCacheFiles();
-			for (File local_file : local_files) {
-				Element node_file = document_cache.createElement("file");
-				rootElement.appendChild(node_file);
-				try {
-					String extension = local_file.getName().substring(local_file.getName().lastIndexOf('.')).toLowerCase();
-					String name = local_file.getName().substring(0, local_file.getName().length() - 1 * extension.length());
-					if (extension.equals(".zip")) {
-						node_file.setAttribute("md5", name);
-					}
-				}
-				catch (StringIndexOutOfBoundsException e) { // because the file does not have an . his path
-				}
+			if (size <= 0) {
+				this.log.debug("Server::getLastRender size is negative (size: " + size + ")");
+				return null;
 			}
 			
-			TransformerFactory tf = TransformerFactory.newInstance();
-			Transformer transformer = tf.newTransformer();
-			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-			StringWriter writer = new StringWriter();
-			transformer.transform(new DOMSource(document_cache), new StreamResult(writer));
-			xml_str = writer.getBuffer().toString();
+			byte[] ret = new byte[size];
+			byte[] ch = new byte[512 * 1024];
+			int n = 0;
+			int i = 0;
+			while ((n = inStrm.read(ch)) != -1) {
+				System.arraycopy(ch, 0, ret, i, n);
+				i += n;
+			}
+			inStrm.close();
+			return ret;
 		}
-		catch (TransformerConfigurationException e) {
-			this.log.debug("Server::generateXMLForMD5cache " + e);
+		catch (Exception e) {
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			this.log.debug("Server::getLastRender Exception " + e + " stacktrace: " + sw.toString());
 		}
-		catch (TransformerException e) {
-			this.log.debug("Server::generateXMLForMD5cache " + e);
-		}
-		catch (ParserConfigurationException e) {
-			this.log.debug("Server::generateXMLForMD5cache " + e);
-		}
-		
-		return xml_str;
+		return null;
 	}
 	
-	private void handleFileMD5DeleteDocument(Document document, String root_nodename) {
-		NodeList ns = document.getElementsByTagName(root_nodename);
-		if (ns.getLength() > 0) {
-			Element root_node = (Element) ns.item(0);
-			ns = root_node.getElementsByTagName("file");
-			if (ns.getLength() > 0) {
-				for (int i = 0; i < ns.getLength(); ++i) {
-					Element file_node = (Element) ns.item(i);
-					if (file_node.hasAttribute("md5") && file_node.hasAttribute("action") && file_node.getAttribute("action").equals("delete")) {
-						String path = this.user_config.workingDirectory.getAbsolutePath() + File.separatorChar + file_node.getAttribute("md5");
-						this.log.debug("Server::handleFileMD5DeleteDocument delete old file " + path);
-						File file_to_delete = new File(path + ".zip");
-						file_to_delete.delete();
-						Utils.delete(new File(path));
-					}
+	private String generateXMLForMD5cache() {
+		List<FileMD5> md5s = new ArrayList<>();
+		for (File local_file : this.user_config.getLocalCacheFiles()) {
+			try {
+				String extension = local_file.getName().substring(local_file.getName().lastIndexOf('.')).toLowerCase();
+				String name = local_file.getName().substring(0, local_file.getName().length() - 1 * extension.length());
+				if (extension.equals(".zip")) {
+					// node_file.setAttribute("md5", name);
+					FileMD5 fileMD5 = new FileMD5();
+					fileMD5.setMd5(name);
+					
+					md5s.add(fileMD5);
+				}
+			}
+			catch (StringIndexOutOfBoundsException e) { // because the file does not have an . its path
+			}
+		}
+
+		CacheFileMD5 cache = new CacheFileMD5();
+		cache.setMd5s(md5s);
+
+		final Persister persister = new Persister();
+		try (StringWriter writer = new StringWriter()) {
+			persister.write(cache, writer);
+			return writer.toString();
+		}
+		catch (final Exception e) {
+			log.debug("Failed to dump md5s " + e);
+			return "";
+		}
+	}
+
+	private void handleFileMD5DeleteDocument(List<FileMD5> fileMD5s) {
+		if (fileMD5s != null && fileMD5s.isEmpty() == false) {
+			for(FileMD5 fileMD5 : fileMD5s) {
+				if ("delete".equals(fileMD5.getAction()) && fileMD5.getMd5() != null && fileMD5.getMd5().isEmpty() == false) {
+					String path = this.user_config.getWorkingDirectory().getAbsolutePath() + File.separatorChar + fileMD5.getMd5();
+					this.log.debug("Server::handleFileMD5DeleteDocument delete old file " + path);
+					File file_to_delete = new File(path + ".zip");
+					file_to_delete.delete();
+					Utils.delete(new File(path));
 				}
 			}
 		}
 	}
 	
 	public String getPage(String key) {
-		if (this.pages.containsKey(key)) {
-			return this.base_url + this.pages.get(key);
+		if (this.serverConfig != null) {
+			return this.base_url + this.serverConfig.getRequestEndPoint(key).getPath();
 		}
 		return "";
 	}
